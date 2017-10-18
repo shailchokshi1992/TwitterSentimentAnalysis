@@ -7,46 +7,27 @@ class SListener(StreamListener):
         self.api = api or API()
         self.counter = 0
         self.fprefix = fprefix
-        self.output  = open(fprefix + '.'
-                            + time.strftime('%Y%m%d-%H%M%S') + '.txt', 'w')
-        self.delout  = open('delete.txt', 'a')
+        self.output  = open(fprefix + '.' + time.strftime('%Y%m%d-%H%M%S') + '.json', 'w')
 
     def on_data(self, data):
 
         if  'in_reply_to_status' in data:
             self.on_status(data)
-        elif 'delete' in data:
-            delete = json.loads(data)['delete']['status']
-            if self.on_delete(delete['id'], delete['user_id']) is False:
-                return False
-        elif 'limit' in data:
-            if self.on_limit(json.loads(data)['limit']['track']) is False:
-                return False
-        elif 'warning' in data:
-            warning = json.loads(data)['warnings']
-            print warning['message']
-            return false
 
     def on_status(self, status):
         self.output.write(status + "\n")
 
         self.counter += 1
-        print (self.counter)
-        if self.counter >= 20000:
+        print ("Writing tweet number :" +self.counter)
+        if self.counter >= 20000: ## Close the file if tweet count exceeds 20000
             self.output.close()
-            self.output = open('../streaming_data/' + self.fprefix + '.'
-                               + time.strftime('%Y%m%d-%H%M%S') + '.json', 'w')
             self.counter = 0
 
-        return
-
-    def on_delete(self, status_id, user_id):
-        self.delout.write( str(status_id) + "\n")
-        return
+        return True
 
     def on_limit(self, track):
         sys.stderr.write(track + "\n")
-        return
+        return True
 
     def on_error(self, status_code):
         sys.stderr.write('Error: ' + str(status_code) + "\n")

@@ -1,37 +1,36 @@
 import tweepy
 import json
-
+import tweepy
+from tweepy import Stream, OAuthHandler
+from tweepy.streaming import StreamListener
 # Authentication details. To  obtain these visit dev.twitter.com
 ACCESS_TOKEN = "804432391-zqbTqPwkZIsxEx1KNnAPuqbtZTOqfu1JjwCeS7bI"
 ACCESS_SECRET = "b25qi2axGm7ZyHciSKkCFyQIDkX0ZqK7Kpc05NCFt9dHv"
-CONSUMER_KEY = "hDxZ0AfEVJk67h0736TZ80u74"
-CONSUMER_SECRET = "klNr0qNg83FGtIfcfuy60WDp8nyLy6PqhslKumqQNfnuEAfpWK"
+CONSUMER_KEY = "lFqoWFDZmVWg21NXO8Qer93J4"
+CONSUMER_SECRET = "jR91Sz66ENAhGyyyuGVSI87S9PfaexGRUc1J3HOvbAOfX7ZPdo"
 
 # This is the listener, resposible for receiving data
-class StdOutListener(tweepy.StreamListener):
+
+
+auth = OAuthHandler(CONSUMER_KEY,CONSUMER_SECRET)
+auth.set_access_token(ACCESS_TOKEN, ACCESS_SECRET)
+
+api = tweepy.API(auth)
+
+class MyListener(StreamListener):
+
     def on_data(self, data):
-        # Parsing
-        decoded = json.loads(data)
-        #open a file to store the status objects
-        file = open('stream.json', 'a')
-        #write json to file
-        json.dump(decoded,file,sort_keys = True,indent = 4)
-        #show progress
-        print "Writing tweets to file,CTRL+C to terminate the program"
-
-
+        try:
+            with open('tweets.json', 'a') as f:
+                f.write(data)
+                return True
+        except BaseException as e:
+            print("Error on_data: %s" % str(e))
         return True
 
     def on_error(self, status):
-        print status
+        print(status)
+        return True
 
-if __name__ == '__main__':
-    l = StdOutListener()
-    auth = tweepy.OAuthHandler(CONSUMER_KEY,CONSUMER_SECRET)
-    auth.set_access_token(ACCESS_TOKEN,ACCESS_SECRET)
-
-    # There are different kinds of streams: public stream, user stream, multi-user streams
-    # For more details refer to https://dev.twitter.com/docs/streaming-apis
-    stream = tweepy.Stream(auth, l)
-    #Hashtag to stream
-    stream.filter(track=["#love"])
+twitter_stream = Stream(auth, MyListener())
+twitter_stream.filter(track=['#TakeAKnee', '#TakeAKneeNFL','#TakeTheKnee','#boycottnfl'])

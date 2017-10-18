@@ -6,7 +6,7 @@ from sklearn.decomposition import NMF, LatentDirichletAllocation
 
 dataset = fetch_20newsgroups(shuffle=True, random_state=1, remove=('headers', 'footers', 'quotes'))
 documents = dataset.data
-print type(documents)
+print (documents)
 
 
 no_features = 1000
